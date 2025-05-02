@@ -1,3 +1,11 @@
+import React from 'react';
+
+import Academy from './PageType/academy';
+import Center from './PageType/center';
+import Instructor from './PageType/instructor';
+import School from './PageType/school';
+
+// Define the interface for searchParams
 interface SearchParams {
   [key: string]: string | string[] | undefined;
 }
@@ -5,41 +13,78 @@ interface SearchParams {
 export default async function ResultsPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
-  const params = await searchParams;
+  const resolvedSearchParams = await searchParams;
+  const modelType = Array.isArray(resolvedSearchParams.model_type)
+    ? resolvedSearchParams.model_type[0]
+    : resolvedSearchParams.model_type;
 
-  const modelType = Array.isArray(params.model_type)
-    ? params.model_type[0]
-    : params.model_type ?? '';
+  // Normalize the page parameter
+  const rawPage = Array.isArray(resolvedSearchParams.page)
+    ? resolvedSearchParams.page[0]
+    : resolvedSearchParams.page;
+  const pageNum = rawPage && !isNaN(Number(rawPage)) ? rawPage : '1';
 
-  const filters = Object.entries(params)
+  // Build API query params, preserving original params except 'page'
+  const apiParams = new URLSearchParams();
+  Object.entries(resolvedSearchParams).forEach(([key, value]) => {
+    if (value === undefined || key === 'page') return;
+    if (Array.isArray(value)) {
+      value.forEach((v) => apiParams.append(key, v));
+    } else {
+      apiParams.append(key, value);
+    }
+  });
+  apiParams.append('page', pageNum);
+
+  const apiUrl = `api/results?${apiParams.toString()}`;
+  console.log('API URL:', apiUrl);
+
+  // Extract filters for display
+  const filters = Object.entries(resolvedSearchParams)
     .filter(
-      ([key, value]) =>
-        key !== 'model_type' && value !== undefined && value !== '',
+      ([key, value]) => key !== 'page' && value !== undefined && value !== '',
     )
     .map(([key, value]) => ({
       key,
       value: Array.isArray(value) ? value.join(', ') : value,
     }));
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">
-        Results for &quot;{modelType || 'All Models'}&quot;
-      </h1>
+  // Render the correct component based on model_type
+  const renderResultsComponent = () => {
+    switch (modelType) {
+      case 'universal':
+        return <p>universal</p>;
+      case 'school':
+        return <School />;
+      case 'academy':
+        return <Academy />;
+      case 'center':
+        return <Center />;
+      case 'instructor':
+        return <Instructor />;
+      default:
+        return (
+          <div className="text-red-500">
+            Unknown model type: {modelType || 'None'}
+          </div>
+        );
+    }
+  };
 
-      {filters.length > 0 ? (
-        <ul className="space-y-2">
-          {filters.map(({ key, value }) => (
-            <li key={key}>
-              <strong>{key.replace(/_/g, ' ')}:</strong> {value}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-gray-500">No filters applied.</p>
-      )}
+  // Final Render
+  return (
+    <div className="p-6 px-5 lg:px-5 xl:px-60">
+      <h1 className="text-2xl font-bold mb-4">
+        Results{' '}
+        {filters.length > 0 && (
+          <>for {filters.find((f) => f.key === 'model_type')?.value}</>
+        )}
+      </h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {renderResultsComponent()}
+      </div>
     </div>
   );
 }
