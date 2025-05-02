@@ -1,0 +1,847 @@
+[
+  {
+  "id": 99,
+  "name": "All Input Types Filter",
+  "model_type": "universal",
+  "inputs": [
+    {
+      "id": 1,
+      "filter_builder_id": 99,
+      "name": "Text Input",
+      "key": "name",
+      "placeholder": "Enter something",
+      "type": "text",
+      "value_input_mode": "json",
+      "values": {
+        "1": "Option A",
+        "2": "Option B"
+      },
+      "is_dependant": false,
+      "parent_id": null,
+      "linked_model": null,
+      "linked_model_id": null,
+      "order": 1,
+      "options": [
+        { "key": 1, "value": "Option A" },
+        { "key": 2, "value": "Option B" }
+      ],
+      "has_children": null
+    },
+    {
+      "id": 2,
+      "filter_builder_id": 99,
+      "name": "Model-based Select",
+      "key": "model_select",
+      "placeholder": "Choose Curriculum",
+      "type": "select",
+      "value_input_mode": "model",
+      "values": {
+        "1": { "en": "British" },
+        "2": { "en": "American" },
+        "3": { "en": "IB" }
+      },
+      "is_dependant": false,
+      "parent_id": null,
+      "linked_model": "App\\Models\\Curriculum",
+      "linked_model_id": null,
+      "order": 2,
+      "options": [
+        { "key": 1, "value": { "en": "British" } },
+        { "key": 2, "value": { "en": "American" } },
+        { "key": 3, "value": { "en": "IB" } }
+      ],
+      "has_children": null
+    },
+    {
+      "id": 3,
+      "filter_builder_id": 99,
+      "name": "Builder-based Select",
+      "key": "builder_select",
+      "placeholder": "Select Year",
+      "type": "select",
+      "value_input_mode": "builder",
+      "values": {
+        "1": "One",
+        "2": "Two"
+      },
+      "is_dependant": false,
+      "parent_id": null,
+      "linked_model": null,
+      "linked_model_id": null,
+      "order": 3,
+      "options": [
+        { "key": 1, "value": "One" },
+        { "key": 2, "value": "Two" }
+      ],
+      "has_children": [4]
+    },
+    {
+      "id": 4,
+      "filter_builder_id": 99,
+      "name": "Dependant Range Input",
+      "key": "range_input",
+      "placeholder": "Choose range",
+      "type": "range",
+      "value_input_mode": "builder",
+      "values": {
+        "min": "1",
+        "max": "90000",
+        "step": "10"
+      },
+      "is_dependant": false,
+      "parent_id": 3,
+      "linked_model": null,
+      "linked_model_id": null,
+      "order": 4,
+      "options": [
+        { "key": "min", "value": "1" },
+        { "key": "max", "value": "1000" },
+        { "key": "step", "value": "10" }
+      ],
+      "has_children": null
+    },
+    {
+      "id": 5,
+      "filter_builder_id": 99,
+      "name": "Dynamic Location Select",
+      "key": "location",
+      "placeholder": "Choose location",
+      "type": "select",
+      "value_input_mode": "dynamic",
+      "values": {
+        "Downtown": { "en": "Downtown", "ar": "وسط المدينة" },
+        "Marina": { "en": "Marina", "ar": "مرسى" }
+      },
+      "is_dependant": false,
+      "parent_id": null,
+      "linked_model": "App\\Models\\DynamicOptionGroup",
+      "linked_model_id": 1,
+      "order": 5,
+      "options": [
+        { "key": "Downtown", "value": { "en": "Downtown", "ar": "وسط المدينة" } },
+        { "key": "Marina", "value": { "en": "Marina", "ar": "مرسى" } }
+      ],
+      "has_children": null
+    }
+  ]
+},
+  {
+    "id": 1,
+    "name": "School Filter",
+    "model_type": "school",
+    "inputs": [
+      {
+        "id": 2,
+        "filter_builder_id": 1,
+        "name": "Name",
+        "key": "name",
+        "placeholder": "Enter Name",
+        "type": "text",
+        "value_input_mode": "json",
+        "values": {
+          "1": "Option A",
+          "2": "Option B"
+        },
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 1,
+        "options": [
+          {
+            "key": 1,
+            "value": "Option A"
+          },
+          {
+            "key": 2,
+            "value": "Option B"
+          }
+        ],
+        "has_children": null
+      },
+      {
+        "id": 17,
+        "filter_builder_id": 1,
+        "name": "Curriculum",
+        "key": "curriculum",
+        "placeholder": "Enter",
+        "type": "select",
+        "value_input_mode": "model",
+        "values": {
+          "1": {
+            "en": "British"
+          },
+          "2": {
+            "en": "American"
+          },
+          "3": {
+            "en": "IB"
+          }
+        },
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": "App\\Models\\Curriculum",
+        "linked_model_id": null,
+        "order": 2,
+        "options": [
+          {
+            "key": 1,
+            "value": {
+              "en": "British"
+            }
+          },
+          {
+            "key": 2,
+            "value": {
+              "en": "American"
+            }
+          },
+          {
+            "key": 3,
+            "value": {
+              "en": "IB"
+            }
+          }
+        ],
+        "has_children": null
+      },
+      {
+        "id": 1,
+        "filter_builder_id": 1,
+        "name": "Year",
+        "key": "year",
+        "placeholder": "Select Year",
+        "type": "select",
+        "value_input_mode": "builder",
+        "values": {
+          "1": "One",
+          "2": "Two"
+        },
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 3,
+        "options": [
+          {
+            "key": 1,
+            "value": "One"
+          },
+          {
+            "key": 2,
+            "value": "Two"
+          }
+        ],
+        "has_children": [3]
+      },
+      {
+        "id": 3,
+        "filter_builder_id": 1,
+        "name": "Fees",
+        "key": "fees",
+        "placeholder": "Choose Fees",
+        "type": "range",
+        "value_input_mode": "builder",
+        "values": {
+          "max": "1000",
+          "min": "1",
+          "step": "10"
+        },
+        "is_dependant": true,
+        "parent_id": 1,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 4,
+        "options": [
+          {
+            "key": "max",
+            "value": "1000"
+          },
+          {
+            "key": "min",
+            "value": "1"
+          },
+          {
+            "key": "step",
+            "value": "10"
+          }
+        ],
+        "has_children": null
+      },
+      {
+        "id": 16,
+        "filter_builder_id": 1,
+        "name": "Location",
+        "key": "location",
+        "placeholder": "Select Location",
+        "type": "select",
+        "value_input_mode": "dynamic",
+        "values": {
+          "Al Barsha": {
+            "ar": "البرشاء",
+            "en": "Al Barsha"
+          },
+          "Al Karama": {
+            "ar": "الكرامة",
+            "en": "Al Karama"
+          },
+          "Al Safa": {
+            "ar": "الصفا",
+            "en": "Al Safa"
+          },
+          "Al Satwa": {
+            "ar": "السطوة",
+            "en": "Al Satwa"
+          },
+          "Al Seef": {
+            "ar": "الصف",
+            "en": "Al Seef"
+          },
+          "Al Sufouh": {
+            "ar": "السفوح",
+            "en": "Al Sufouh"
+          },
+          "Al Quoz": {
+            "ar": "القوز",
+            "en": "Al Quoz"
+          },
+          "Al Wasl": {
+            "ar": "الوصلة",
+            "en": "Al Wasl"
+          },
+          "Bur Dubai": {
+            "ar": "بر دبي",
+            "en": "Bur Dubai"
+          },
+          "Business Bay": {
+            "ar": "خليج الأعمال",
+            "en": "Business Bay"
+          },
+          "Deira": {
+            "ar": "ديرة",
+            "en": "Deira"
+          },
+          "Dubai International Financial Centre": {
+            "ar": "مركز دبي المالي العالمي",
+            "en": "Dubai International Financial Centre"
+          },
+          "Downtown Dubai": {
+            "ar": "وسط مدينة دبي",
+            "en": "Downtown Dubai"
+          },
+          "Dubai Design District": {
+            "ar": "منطقة دبي للتصميم",
+            "en": "Dubai Design District"
+          },
+          "Dubai Marina": {
+            "ar": "مرسى دبي",
+            "en": "Dubai Marina"
+          },
+          "Jebel Ali": {
+            "ar": "جبل علي",
+            "en": "Jebel Ali"
+          },
+          "Jumeirah": {
+            "ar": "جميرا",
+            "en": "Jumeirah"
+          },
+          "Jumeirah Beach Residence": {
+            "ar": "جميرا بيتش ريزيدنس",
+            "en": "Jumeirah Beach Residence"
+          },
+          "Jumeirah Lakes Towers": {
+            "ar": "أبراج بحيرات جميرا",
+            "en": "Jumeirah Lakes Towers"
+          },
+          "Palm Jumeirah": {
+            "ar": "نخلة جميرا",
+            "en": "Palm Jumeirah"
+          },
+          "Umm Suqeim": {
+            "ar": "أم سقيم",
+            "en": "Umm Suqeim"
+          }
+        },
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": "App\\Models\\DynamicOptionGroup",
+        "linked_model_id": 1,
+        "order": 5,
+        "options": [
+          {
+            "key": "Al Barsha",
+            "value": {
+              "ar": "البرشاء",
+              "en": "Al Barsha"
+            }
+          },
+          {
+            "key": "Al Karama",
+            "value": {
+              "ar": "الكرامة",
+              "en": "Al Karama"
+            }
+          },
+          {
+            "key": "Al Safa",
+            "value": {
+              "ar": "الصفا",
+              "en": "Al Safa"
+            }
+          },
+          {
+            "key": "Al Satwa",
+            "value": {
+              "ar": "السطوة",
+              "en": "Al Satwa"
+            }
+          },
+          {
+            "key": "Al Seef",
+            "value": {
+              "ar": "الصف",
+              "en": "Al Seef"
+            }
+          },
+          {
+            "key": "Al Sufouh",
+            "value": {
+              "ar": "السفوح",
+              "en": "Al Sufouh"
+            }
+          },
+          {
+            "key": "Al Quoz",
+            "value": {
+              "ar": "القوز",
+              "en": "Al Quoz"
+            }
+          },
+          {
+            "key": "Al Wasl",
+            "value": {
+              "ar": "الوصلة",
+              "en": "Al Wasl"
+            }
+          },
+          {
+            "key": "Bur Dubai",
+            "value": {
+              "ar": "بر دبي",
+              "en": "Bur Dubai"
+            }
+          },
+          {
+            "key": "Business Bay",
+            "value": {
+              "ar": "خليج الأعمال",
+              "en": "Business Bay"
+            }
+          },
+          {
+            "key": "Deira",
+            "value": {
+              "ar": "ديرة",
+              "en": "Deira"
+            }
+          },
+          {
+            "key": "Dubai International Financial Centre",
+            "value": {
+              "ar": "مركز دبي المالي العالمي",
+              "en": "Dubai International Financial Centre"
+            }
+          },
+          {
+            "key": "Downtown Dubai",
+            "value": {
+              "ar": "وسط مدينة دبي",
+              "en": "Downtown Dubai"
+            }
+          },
+          {
+            "key": "Dubai Design District",
+            "value": {
+              "ar": "منطقة دبي للتصميم",
+              "en": "Dubai Design District"
+            }
+          },
+          {
+            "key": "Dubai Marina",
+            "value": {
+              "ar": "مرسى دبي",
+              "en": "Dubai Marina"
+            }
+          },
+          {
+            "key": "Jebel Ali",
+            "value": {
+              "ar": "جبل علي",
+              "en": "Jebel Ali"
+            }
+          },
+          {
+            "key": "Jumeirah",
+            "value": {
+              "ar": "جميرا",
+              "en": "Jumeirah"
+            }
+          },
+          {
+            "key": "Jumeirah Beach Residence",
+            "value": {
+              "ar": "جميرا بيتش ريزيدنس",
+              "en": "Jumeirah Beach Residence"
+            }
+          },
+          {
+            "key": "Jumeirah Lakes Towers",
+            "value": {
+              "ar": "أبراج بحيرات جميرا",
+              "en": "Jumeirah Lakes Towers"
+            }
+          },
+          {
+            "key": "Palm Jumeirah",
+            "value": {
+              "ar": "نخلة جميرا",
+              "en": "Palm Jumeirah"
+            }
+          },
+          {
+            "key": "Umm Suqeim",
+            "value": {
+              "ar": "أم سقيم",
+              "en": "Umm Suqeim"
+            }
+          }
+        ],
+        "has_children": null
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Academy Filter",
+    "model_type": "academy",
+    "inputs": [
+      {
+        "id": 4,
+        "filter_builder_id": 2,
+        "name": "City",
+        "key": "city",
+        "placeholder": "Select City",
+        "type": "select",
+        "value_input_mode": "model",
+        "values": {
+          "1": "Dubai",
+          "2": "Abu Dhabi",
+          "3": "Sharjah"
+        },
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": "App\\Models\\City",
+        "linked_model_id": null,
+        "order": 1,
+        "options": [
+          {
+            "key": 1,
+            "value": "Dubai"
+          },
+          {
+            "key": 2,
+            "value": "Abu Dhabi"
+          },
+          {
+            "key": 3,
+            "value": "Sharjah"
+          }
+        ],
+        "has_children": [5, 18]
+      },
+      {
+        "id": 5,
+        "filter_builder_id": 2,
+        "name": "Location",
+        "key": "location-academy",
+        "placeholder": "Select Location",
+        "type": "select",
+        "value_input_mode": "model",
+        "values": {
+          "1": "Al Khaldiya",
+          "2": {
+            "en": "Bateen"
+          },
+          "3": {
+            "en": "Al Barsha"
+          },
+          "4": {
+            "en": "Tecom"
+          }
+        },
+        "is_dependant": true,
+        "parent_id": 4,
+        "linked_model": "App\\Models\\Location",
+        "linked_model_id": null,
+        "order": 2,
+        "options": [
+          {
+            "key": 1,
+            "value": "Al Khaldiya"
+          },
+          {
+            "key": 2,
+            "value": {
+              "en": "Bateen"
+            }
+          },
+          {
+            "key": 3,
+            "value": {
+              "en": "Al Barsha"
+            }
+          },
+          {
+            "key": 4,
+            "value": {
+              "en": "Tecom"
+            }
+          }
+        ],
+        "has_children": null
+      },
+      {
+        "id": 18,
+        "filter_builder_id": 2,
+        "name": "Grade",
+        "key": "grade",
+        "placeholder": "Enter",
+        "type": "select",
+        "value_input_mode": "model",
+        "values": [],
+        "is_dependant": true,
+        "parent_id": 4,
+        "linked_model": "App\\Models\\Grade",
+        "linked_model_id": null,
+        "order": 3,
+        "options": [],
+        "has_children": null
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Center Filter",
+    "model_type": "center",
+    "inputs": [
+      {
+        "id": 8,
+        "filter_builder_id": 3,
+        "name": "soluta",
+        "key": "voluptatem-ratione-alias-recusandae-ut",
+        "placeholder": "Occaecati suscipit et provident dolor.",
+        "type": "range",
+        "value_input_mode": "json",
+        "values": null,
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 0,
+        "options": [],
+        "has_children": null
+      },
+      {
+        "id": 11,
+        "filter_builder_id": 3,
+        "name": "omnis",
+        "key": "et-mollitia-et-et-a-similique-molestiae-fugiat-saepe",
+        "placeholder": "Sit voluptatem veniam voluptate error neque ut.",
+        "type": "range",
+        "value_input_mode": "json",
+        "values": null,
+        "is_dependant": true,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 2,
+        "options": [],
+        "has_children": null
+      },
+      {
+        "id": 10,
+        "filter_builder_id": 3,
+        "name": "in",
+        "key": "nihil-quae-temporibus-ut-maxime-est-sed-labore",
+        "placeholder": "Ea delectus ipsam corrupti voluptatem ex.",
+        "type": "range",
+        "value_input_mode": "json",
+        "values": null,
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 6,
+        "options": [],
+        "has_children": null
+      },
+      {
+        "id": 9,
+        "filter_builder_id": 3,
+        "name": "minus",
+        "key": "perferendis-consequatur-quia-veniam",
+        "placeholder": "Magnam temporibus illum reiciendis voluptatem.",
+        "type": "range",
+        "value_input_mode": "json",
+        "values": {
+          "1": "Option A",
+          "2": "Option B"
+        },
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 7,
+        "options": [
+          {
+            "key": 1,
+            "value": "Option A"
+          },
+          {
+            "key": 2,
+            "value": "Option B"
+          }
+        ],
+        "has_children": null
+      },
+      {
+        "id": 7,
+        "filter_builder_id": 3,
+        "name": "natus",
+        "key": "rem-et-excepturi-nemo-ad-doloremque-expedita-fugit",
+        "placeholder": "Soluta harum voluptates sint eum.",
+        "type": "range",
+        "value_input_mode": "json",
+        "values": {
+          "1": "Option A",
+          "2": "Option B"
+        },
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 9,
+        "options": [
+          {
+            "key": 1,
+            "value": "Option A"
+          },
+          {
+            "key": 2,
+            "value": "Option B"
+          }
+        ],
+        "has_children": null
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Instructor Filter",
+    "model_type": "instructor",
+    "inputs": [
+      {
+        "id": 12,
+        "filter_builder_id": 4,
+        "name": "molestiae",
+        "key": "unde-dicta-saepe-autem-amet-molestiae-perspiciatis-et",
+        "placeholder": "In nisi voluptas aut sunt et.",
+        "type": "range",
+        "value_input_mode": "json",
+        "values": null,
+        "is_dependant": true,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 1,
+        "options": [],
+        "has_children": null
+      },
+      {
+        "id": 15,
+        "filter_builder_id": 4,
+        "name": "voluptas",
+        "key": "consequatur-ipsam-rerum-aliquid-cupiditate-quidem-ipsa",
+        "placeholder": "Quod et provident qui animi.",
+        "type": "text",
+        "value_input_mode": "json",
+        "values": {
+          "1": "Option A",
+          "2": "Option B"
+        },
+        "is_dependant": true,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 2,
+        "options": [
+          {
+            "key": 1,
+            "value": "Option A"
+          },
+          {
+            "key": 2,
+            "value": "Option B"
+          }
+        ],
+        "has_children": null
+      },
+      {
+        "id": 14,
+        "filter_builder_id": 4,
+        "name": "vel",
+        "key": "aut-ut-consectetur-at-sint-accusantium-deserunt-quas",
+        "placeholder": "Accusantium molestiae ab molestias aut distinctio soluta inventore.",
+        "type": "text",
+        "value_input_mode": "json",
+        "values": null,
+        "is_dependant": false,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 5,
+        "options": [],
+        "has_children": null
+      },
+      {
+        "id": 13,
+        "filter_builder_id": 4,
+        "name": "laborum",
+        "key": "repudiandae-quam-itaque-quaerat-eligendi-quidem-ea",
+        "placeholder": "Mollitia quo sed voluptate qui dolor sequi et.",
+        "type": "text",
+        "value_input_mode": "json",
+        "values": {
+          "1": "Option A",
+          "2": "Option B"
+        },
+        "is_dependant": true,
+        "parent_id": null,
+        "linked_model": null,
+        "linked_model_id": null,
+        "order": 7,
+        "options": [
+          {
+            "key": 1,
+            "value": "Option A"
+          },
+          {
+            "key": 2,
+            "value": "Option B"
+          }
+        ],
+        "has_children": null
+      }
+    ]
+  }
+]
