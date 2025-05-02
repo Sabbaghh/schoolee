@@ -18,18 +18,21 @@ import dummyData from './dummydata.json';
 function Filter() {
   const router = useRouter();
   const [active, setActive] = useState(dummyData[0].model_type);
+
   // Build initial values from JSON defaults
   const initialValues = useMemo(() => {
     const builder = dummyData.find((b) => b.model_type === active);
     if (!builder) return {};
     return builder.inputs.reduce<Record<string, unknown>>((acc, input) => {
       if (input.type === 'range') {
-        const values = input.values as
-          | { min?: string; max?: string; step?: string }
-          | undefined;
+        const vals = input.values as {
+          min?: string;
+          max?: string;
+          step?: string;
+        };
         acc[input.key] = {
-          min: parseFloat(values?.min ?? '0'),
-          max: parseFloat(values?.max ?? '0'),
+          min: parseFloat(vals?.min ?? '0'),
+          max: parseFloat(vals?.max ?? '0'),
         };
       } else {
         acc[input.key] = '';
@@ -40,10 +43,50 @@ function Filter() {
 
   const [values, setValues] = useState<Record<string, unknown>>(initialValues);
 
-  // Reset values when switching tabs
+  // Reset values when switching tab defaults change
   useEffect(() => {
     setValues(initialValues);
   }, [initialValues]);
+
+  // Handle tab change: reset filters and navigate only with model_type
+  const handleTabChange = (value: string) => {
+    setActive(value);
+    // reset values to defaults for new tab
+    const builder = dummyData.find((b) => b.model_type === value);
+    const defaults = builder
+      ? builder.inputs.reduce<Record<string, unknown>>((acc, input) => {
+          if (input.type === 'range') {
+            const vals = input.values as { min?: string; max?: string };
+            acc[input.key] = {
+              min: parseFloat(vals?.min ?? '0'),
+              max: parseFloat(vals?.max ?? '0'),
+            };
+          } else {
+            acc[input.key] = '';
+          }
+          return acc;
+        }, {})
+      : {};
+    setValues(defaults);
+    // navigate with only model_type param
+    router.push(`/results?model_type=${value}`);
+  };
+
+  // Handle search button click: navigate with all params
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    params.set('model_type', active);
+    Object.entries(values).forEach(([key, val]) => {
+      if (typeof val === 'object' && val !== null) {
+        const range = val as { min?: number; max?: number };
+        if (range.min != null) params.set(`${key}_min`, String(range.min));
+        if (range.max != null) params.set(`${key}_max`, String(range.max));
+      } else {
+        params.set(key, String(val));
+      }
+    });
+    router.push(`/results?${params.toString()}`);
+  };
 
   const inputs = useMemo(() => {
     const builder = dummyData.find((b) => b.model_type === active);
@@ -78,32 +121,10 @@ function Filter() {
       return { ...prev, [key]: value };
     });
 
-  const handleSearch = () => {
-    // 1) grab all current values
-    const params = new URLSearchParams();
-    params.set('model_type', active);
-
-    // 2) flatten your `values` object into query params
-    Object.entries(values).forEach(([key, val]) => {
-      if (typeof val === 'object' && val !== null) {
-        // a range: { min, max }
-        const range = val as { min?: number; max?: number };
-        if (range.min != null) params.set(`${key}_min`, String(range.min));
-        if (range.max != null) params.set(`${key}_max`, String(range.max));
-      } else {
-        // primitive
-        params.set(key, String(val));
-      }
-    });
-
-    // 3) push to /results?…
-    router.push(`/results?${params.toString()}`);
-  };
-
   return (
     <div className="space-y-4">
-      {/* nav tabs */}
-      <Tabs value={active} onValueChange={setActive}>
+      {/* nav tabs with navigation */}
+      <Tabs value={active} onValueChange={handleTabChange}>
         <TabsList>
           {dummyData.map((b) => (
             <TabsTrigger key={b.id} value={b.model_type}>
@@ -148,18 +169,14 @@ function Filter() {
 
             {i.type === 'range' &&
               (() => {
-                // Use JSON-defined values
-                const minOption = parseFloat(
-                  (i.values && 'min' in i.values ? i.values.min : '0') ?? '0',
-                );
-                const maxOption = parseFloat(
-                  (i.values && typeof i.values === 'object' && 'max' in i.values
-                    ? i.values.max
-                    : '100') ?? '100',
-                );
-                const step = parseFloat(
-                  (i.values as { step?: string } | undefined)?.step ?? '1',
-                );
+                const vals = i.values as {
+                  min?: string;
+                  max?: string;
+                  step?: string;
+                };
+                const minOption = parseFloat(vals?.min ?? '0');
+                const maxOption = parseFloat(vals?.max ?? '100');
+                const step = parseFloat(vals?.step ?? '1');
 
                 const raw = values[i.key] as
                   | { min?: number; max?: number }
