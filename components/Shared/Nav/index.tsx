@@ -3,7 +3,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -12,6 +11,11 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import dummyData from './dummydata.json';
 
@@ -122,12 +126,16 @@ function Filter() {
     });
 
   return (
-    <div className="space-y-4">
+    <div className="w-full sm:w-full md:w-3/4 lg:w-1/2 mx-auto bg-[#0C141A] rounded-b-full">
       {/* nav tabs with navigation */}
       <Tabs value={active} onValueChange={handleTabChange}>
-        <TabsList>
+        <TabsList className="bg-transparent  w-full gap-1">
           {dummyData.map((b) => (
-            <TabsTrigger key={b.id} value={b.model_type}>
+            <TabsTrigger
+              className={` data-[state=active]:bg-primary/50  data-[state=inactive]:bg-primary  rounded-tl-lg rounded-tr-lg rounded-b-none `}
+              key={b.id}
+              value={b.model_type}
+            >
               {b.name.replace(' Filter', '')}
             </TabsTrigger>
           ))}
@@ -135,36 +143,46 @@ function Filter() {
       </Tabs>
 
       {/* dynamic filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+      <div className="flex flex-row gap-2">
         {visibleInputs.map((i) => (
-          <div key={i.id}>
-            <Label htmlFor={i.key}>{i.name}</Label>
-
+          <div className=" w-full flex" key={i.id}>
             {i.type === 'text' && (
-              <Input
-                id={i.key}
-                placeholder={i.placeholder}
-                value={String(values[i.key] || '')}
-                onChange={(e) => onChange(i.key, e.currentTarget.value)}
-              />
+              <>
+                <div className="self-center">Icon</div>
+                <Input
+                  className="flex-1 border-none placeholder:text-white font-primary  "
+                  id={i.key}
+                  placeholder={i.name}
+                  value={String(values[i.key] || '')}
+                  onChange={(e) => onChange(i.key, e.currentTarget.value)}
+                />
+              </>
             )}
 
             {i.type === 'select' && (
-              <Select
-                onValueChange={(v) => onChange(i.key, v)}
-                value={values[i.key] as string | undefined}
-              >
-                <SelectTrigger id={i.key}>
-                  <SelectValue placeholder={i.placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {i.options.map((opt) => (
-                    <SelectItem key={opt.key} value={String(opt.key)}>
-                      {typeof opt.value === 'string' ? opt.value : opt.value.en}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <div className="self-center">Icon</div>
+                <Select
+                  onValueChange={(v) => onChange(i.key, v)}
+                  value={values[i.key] as string | undefined}
+                >
+                  <SelectTrigger
+                    className="border-none data-[placeholder]:text-white-400 w-full "
+                    id={i.key}
+                  >
+                    <SelectValue placeholder={i.name} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {i.options.map((opt) => (
+                      <SelectItem key={opt.key} value={String(opt.key)}>
+                        {typeof opt.value === 'string'
+                          ? opt.value
+                          : opt.value.en}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
             )}
 
             {i.type === 'range' &&
@@ -188,46 +206,52 @@ function Filter() {
                 const safeMax = Math.max(minValue, maxValue);
 
                 return (
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <Input
-                        type="number"
-                        placeholder="Min"
-                        value={safeMin}
-                        min={minOption}
-                        max={safeMax}
-                        step={step}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          if (!isNaN(v))
-                            onChange(i.key, { min: Math.min(v, safeMax) });
-                        }}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Max"
-                        value={safeMax}
-                        min={safeMin}
-                        max={maxOption}
-                        step={step}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          if (!isNaN(v))
-                            onChange(i.key, { max: Math.max(v, safeMin) });
-                        }}
-                      />
-                    </div>
+                  <Popover>
+                    <div className="self-center">Icon</div>
+                    <PopoverTrigger className="w-full">{i.name}</PopoverTrigger>
+                    <PopoverContent>
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            placeholder="Min"
+                            value={safeMin}
+                            min={minOption}
+                            max={safeMax}
+                            step={step}
+                            onChange={(e) => {
+                              const v = Number(e.target.value);
+                              if (!isNaN(v))
+                                onChange(i.key, { min: Math.min(v, safeMax) });
+                            }}
+                          />
+                          <Input
+                            type="number"
+                            placeholder="Max"
+                            value={safeMax}
+                            min={safeMin}
+                            max={maxOption}
+                            step={step}
+                            onChange={(e) => {
+                              const v = Number(e.target.value);
+                              if (!isNaN(v))
+                                onChange(i.key, { max: Math.max(v, safeMin) });
+                            }}
+                          />
+                        </div>
 
-                    <Slider
-                      min={minOption}
-                      max={maxOption}
-                      step={step}
-                      value={[safeMin, safeMax]}
-                      onValueChange={([min, max]) =>
-                        onChange(i.key, { min, max })
-                      }
-                    />
-                  </div>
+                        <Slider
+                          min={minOption}
+                          max={maxOption}
+                          step={step}
+                          value={[safeMin, safeMax]}
+                          onValueChange={([min, max]) =>
+                            onChange(i.key, { min, max })
+                          }
+                        />
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 );
               })()}
           </div>

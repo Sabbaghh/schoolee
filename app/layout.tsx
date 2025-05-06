@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { Work_Sans } from 'next/font/google';
+import { Cairo } from 'next/font/google';
 
 import Nav from '@/components/Shared/Nav';
 import './globals.css';
-const workSans = Work_Sans({
+const workSans = Cairo({
   subsets: ['latin'],
   variable: '--font-primary',
 });
@@ -21,7 +21,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${workSans.variable} font-primary antialiased`}>
-        {/* <FilterPanel /> */}
         <Nav />
         {children}
       </body>

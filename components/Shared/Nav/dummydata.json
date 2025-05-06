@@ -247,7 +247,7 @@
           "min": "1",
           "step": "10"
         },
-        "is_dependant": true,
+        "is_dependant": false,
         "parent_id": 1,
         "linked_model": null,
         "linked_model_id": null,

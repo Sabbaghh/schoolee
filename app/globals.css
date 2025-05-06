@@ -143,6 +143,10 @@
   --sidebar-ring: #e35a00;
 }
 
+* {
+  font-family: var(--font-primary) !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
