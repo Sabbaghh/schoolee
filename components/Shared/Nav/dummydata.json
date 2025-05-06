@@ -1,139 +1,14 @@
 [
-  {
-  "id": 99,
-  "name": "All Input Types Filter",
-  "model_type": "universal",
-  "inputs": [
-    {
-      "id": 1,
-      "filter_builder_id": 99,
-      "name": "Text Input",
-      "key": "name",
-      "placeholder": "Enter something",
-      "type": "text",
-      "value_input_mode": "json",
-      "values": {
-        "1": "Option A",
-        "2": "Option B"
-      },
-      "is_dependant": false,
-      "parent_id": null,
-      "linked_model": null,
-      "linked_model_id": null,
-      "order": 1,
-      "options": [
-        { "key": 1, "value": "Option A" },
-        { "key": 2, "value": "Option B" }
-      ],
-      "has_children": null
-    },
-    {
-      "id": 2,
-      "filter_builder_id": 99,
-      "name": "Model-based Select",
-      "key": "model_select",
-      "placeholder": "Choose Curriculum",
-      "type": "select",
-      "value_input_mode": "model",
-      "values": {
-        "1": { "en": "British" },
-        "2": { "en": "American" },
-        "3": { "en": "IB" }
-      },
-      "is_dependant": false,
-      "parent_id": null,
-      "linked_model": "App\\Models\\Curriculum",
-      "linked_model_id": null,
-      "order": 2,
-      "options": [
-        { "key": 1, "value": { "en": "British" } },
-        { "key": 2, "value": { "en": "American" } },
-        { "key": 3, "value": { "en": "IB" } }
-      ],
-      "has_children": null
-    },
-    {
-      "id": 3,
-      "filter_builder_id": 99,
-      "name": "Builder-based Select",
-      "key": "builder_select",
-      "placeholder": "Select Year",
-      "type": "select",
-      "value_input_mode": "builder",
-      "values": {
-        "1": "One",
-        "2": "Two"
-      },
-      "is_dependant": false,
-      "parent_id": null,
-      "linked_model": null,
-      "linked_model_id": null,
-      "order": 3,
-      "options": [
-        { "key": 1, "value": "One" },
-        { "key": 2, "value": "Two" }
-      ],
-      "has_children": [4]
-    },
-    {
-      "id": 4,
-      "filter_builder_id": 99,
-      "name": "Dependant Range Input",
-      "key": "range_input",
-      "placeholder": "Choose range",
-      "type": "range",
-      "value_input_mode": "builder",
-      "values": {
-        "min": "1",
-        "max": "90000",
-        "step": "10"
-      },
-      "is_dependant": false,
-      "parent_id": 3,
-      "linked_model": null,
-      "linked_model_id": null,
-      "order": 4,
-      "options": [
-        { "key": "min", "value": "1" },
-        { "key": "max", "value": "1000" },
-        { "key": "step", "value": "10" }
-      ],
-      "has_children": null
-    },
-    {
-      "id": 5,
-      "filter_builder_id": 99,
-      "name": "Dynamic Location Select",
-      "key": "location",
-      "placeholder": "Choose location",
-      "type": "select",
-      "value_input_mode": "dynamic",
-      "values": {
-        "Downtown": { "en": "Downtown", "ar": "وسط المدينة" },
-        "Marina": { "en": "Marina", "ar": "مرسى" }
-      },
-      "is_dependant": false,
-      "parent_id": null,
-      "linked_model": "App\\Models\\DynamicOptionGroup",
-      "linked_model_id": 1,
-      "order": 5,
-      "options": [
-        { "key": "Downtown", "value": { "en": "Downtown", "ar": "وسط المدينة" } },
-        { "key": "Marina", "value": { "en": "Marina", "ar": "مرسى" } }
-      ],
-      "has_children": null
-    }
-  ]
-},
+
   {
     "id": 1,
-    "name": "School Filter",
+    "name": "Schools",
     "model_type": "school",
     "inputs": [
       {
         "id": 2,
         "filter_builder_id": 1,
-        "name": "Name",
+        "name": "Search Keyword",
         "key": "name",
         "placeholder": "Enter Name",
         "type": "text",
@@ -162,7 +37,7 @@
       {
         "id": 17,
         "filter_builder_id": 1,
-        "name": "Curriculum",
+        "name": "Select Curriculum",
         "key": "curriculum",
         "placeholder": "Enter",
         "type": "select",
@@ -208,7 +83,7 @@
       {
         "id": 1,
         "filter_builder_id": 1,
-        "name": "Year",
+        "name": "KHDA Rating",
         "key": "year",
         "placeholder": "Select Year",
         "type": "select",
@@ -237,7 +112,7 @@
       {
         "id": 3,
         "filter_builder_id": 1,
-        "name": "Fees",
+        "name": "Fee Range(AED)",
         "key": "fees",
         "placeholder": "Choose Fees",
         "type": "range",
@@ -271,7 +146,7 @@
       {
         "id": 16,
         "filter_builder_id": 1,
-        "name": "Location",
+        "name": "Select Location",
         "key": "location",
         "placeholder": "Select Location",
         "type": "select",
@@ -522,7 +397,7 @@
   },
   {
     "id": 2,
-    "name": "Academy Filter",
+    "name": "Academies & Activities",
     "model_type": "academy",
     "inputs": [
       {
@@ -631,7 +506,7 @@
   },
   {
     "id": 3,
-    "name": "Center Filter",
+    "name": "Exceptional Learning Centers",
     "model_type": "center",
     "inputs": [
       {
@@ -747,7 +622,7 @@
   },
   {
     "id": 4,
-    "name": "Instructor Filter",
+    "name": "Coaching & Tutoring",
     "model_type": "instructor",
     "inputs": [
       {
