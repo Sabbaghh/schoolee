@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import SideBar from '@/components/Shared/SideBar';
+
 import { Cairo } from 'next/font/google';
 
 import Nav from '@/components/Shared/Nav';
 import './globals.css';
-const workSans = Cairo({
+const cairo = Cairo({
   subsets: ['latin'],
   variable: '--font-primary',
 });
@@ -20,9 +23,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${workSans.variable} font-primary antialiased`}>
+      <body
+        suppressHydrationWarning
+        className={`${cairo.variable} font-primary antialiased`}
+      >
         <Nav />
-        {children}
+        <SidebarProvider className="flex flex-col">
+          <SideBar />
+          {children}
+        </SidebarProvider>
       </body>
     </html>
   );

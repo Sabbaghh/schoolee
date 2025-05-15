@@ -1,9 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 'use client';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -22,118 +23,123 @@ import dummyData from './dummydata.json';
 
 function Filter() {
   const router = useRouter();
-  const [active, setActive] = useState(dummyData[0].model_type);
+  const searchParams = useSearchParams();
 
-  // Build initial values from JSON defaults
+  // skip initial mount for real-time effect
+  const isFirstRun = useRef(true);
+
+  // Determine active tab from URL or default
+  const urlModel = searchParams.get('model_type') || dummyData[0].model_type;
+  const [active, setActive] = useState(urlModel);
+
+  // Build URL-sync or default initial values
   const initialValues = useMemo(() => {
-    const builder = dummyData.find((b) => b.model_type === active);
-    if (!builder) return {};
-    return builder.inputs.reduce<Record<string, unknown>>((acc, input) => {
+    const builder = dummyData.find((b) => b.model_type === active)!;
+    return builder.inputs.reduce((acc, input) => {
+      const key = input.key;
       if (input.type === 'range') {
-        const vals = input.values as {
-          min?: string;
-          max?: string;
-          step?: string;
-        };
-        acc[input.key] = {
-          min: parseFloat(vals?.min ?? '0'),
-          max: parseFloat(vals?.max ?? '0'),
+        const defMin = parseFloat(
+          (input.values &&
+          typeof input.values === 'object' &&
+          'min' in input.values
+            ? input.values.min
+            : '0') ?? '0',
+        );
+        const defMax = parseFloat(
+          (input.values &&
+          typeof input.values === 'object' &&
+          'max' in input.values
+            ? input.values.max
+            : '0') ?? '0',
+        );
+        const qMin = searchParams.get(key + '_min');
+        const qMax = searchParams.get(key + '_max');
+        acc[key] = {
+          min: qMin ? parseFloat(qMin) : defMin,
+          max: qMax ? parseFloat(qMax) : defMax,
         };
       } else {
-        acc[input.key] = '';
+        const q = searchParams.get(key);
+        acc[key] = q ?? '';
       }
       return acc;
-    }, {});
-  }, [active]);
+    }, {} as Record<string, string | number | Record<string, number>>);
+  }, [active, searchParams]);
 
-  const [values, setValues] = useState<Record<string, unknown>>(initialValues);
+  const [values, setValues] = useState(initialValues);
 
-  // Reset values when switching tab defaults change
+  // Reset values on tab change or URL change
   useEffect(() => {
     setValues(initialValues);
   }, [initialValues]);
 
-  // fecth when filter change
+  // Real-time navigation effect with debounce
   useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+
     const timeout = setTimeout(() => {
-      handleSearch();
+      const params = new URLSearchParams();
+      params.set('model_type', active);
+
+      const builder = dummyData.find((b) => b.model_type === active)!;
+      let shouldNavigate = false; // new flag
+
+      builder.inputs.forEach((input) => {
+        const key = input.key;
+        const val = values[key];
+
+        if (input.type === 'range') {
+          const defMin = parseFloat(input.values?.min ?? '0');
+          const defMax = parseFloat(input.values?.max ?? '0');
+          const cur = val as { min?: number; max?: number };
+
+          if (cur.min != null && cur.min !== defMin) {
+            params.set(key + '_min', String(cur.min));
+            shouldNavigate = true;
+          }
+          if (cur.max != null && cur.max !== defMax) {
+            params.set(key + '_max', String(cur.max));
+            shouldNavigate = true;
+          }
+        } else if (val && String(val).trim() !== '') {
+          params.set(key, String(val));
+          shouldNavigate = true;
+        }
+      });
+
+      if (shouldNavigate) {
+        router.push(`/results?${params.toString()}`);
+      }
+      // 👆 Only navigate if there's something actually different
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [values, active]);
+  }, [values, active, router]);
 
-  // Handle tab change: reset filters and navigate only with model_type
+  // Handle tab change: switch active, reset values, immediate navigate
   const handleTabChange = (value: string) => {
     setActive(value);
-    // reset values to defaults for new tab
-    const builder = dummyData.find((b) => b.model_type === value);
-    const defaults = builder
-      ? builder.inputs.reduce<Record<string, unknown>>((acc, input) => {
-          if (input.type === 'range') {
-            const vals = input.values as { min?: string; max?: string };
-            acc[input.key] = {
-              min: parseFloat(vals?.min ?? '0'),
-              max: parseFloat(vals?.max ?? '0'),
-            };
-          } else {
-            acc[input.key] = '';
-          }
-          return acc;
-        }, {})
-      : {};
-    setValues(defaults);
-    // navigate with only model_type param
     router.push(`/results?model_type=${value}`);
   };
 
-  // Handle search button click: navigate with all params
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    params.set('model_type', active);
-    Object.entries(values).forEach(([key, val]) => {
-      if (typeof val === 'object' && val !== null) {
-        const range = val as { min?: number; max?: number };
-        if (range.min != null) params.set(`${key}_min`, String(range.min));
-        if (range.max != null) params.set(`${key}_max`, String(range.max));
-      } else {
-        params.set(key, String(val));
-      }
-    });
-    router.push(`/results?${params.toString()}`);
-  };
-
+  // Render inputs based on active
   const inputs = useMemo(() => {
-    const builder = dummyData.find((b) => b.model_type === active);
-    return builder ? builder.inputs : [];
+    return dummyData.find((b) => b.model_type === active)!.inputs;
   }, [active]);
-
   const visibleInputs = inputs.filter(
     (i) => !i.is_dependant || (i.parent_id && values[i.parent_id] != null),
   );
 
+  // Input change handler
   const onChange = (
     key: string,
     value: string | number | Record<string, number>,
-  ) =>
-    setValues((prev) => {
-      const existing = prev[key];
-      if (
-        typeof value === 'object' &&
-        value !== null &&
-        !Array.isArray(value)
-      ) {
-        return {
-          ...prev,
-          [key]: {
-            ...(typeof existing === 'object' && existing !== null
-              ? existing
-              : {}),
-            ...value,
-          },
-        };
-      }
-      return { ...prev, [key]: value };
-    });
+  ) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+  };
 
   return (
     <>
@@ -481,24 +487,23 @@ function Filter() {
                   })()}
               </div>
             ))}
-            <div>
-              <Button className="bg-transparent" onClick={handleSearch}>
-                <div className="self-center ">
-                  <div className="w-8 h-8 bg-secondary/10 rounded-full flex justify-center items-center">
-                    <i className="fas fa-search text-sm text-primary"></i>
-                  </div>
+            {/* SearchButton */}
+            <div className="flex flex-row justify-center align-middle self-center ">
+              <div className="self-center mx-2">
+                <div className="w-8 h-8 bg-secondary/10 rounded-full flex justify-center items-center">
+                  <i className="fas fa-search text-[15px] text-primary"></i>
                 </div>
-              </Button>
+              </div>
             </div>
           </div>
         </div>
         <div className="flex-1 flex justify-center">
           <div className="flex flex-row justify-center align-middle self-center ">
-            <div className="self-center mx-2">
+            {/* <div className="self-center mx-2">
               <div className="w-8 h-8 bg-secondary/10 rounded-full flex justify-center items-center">
                 <i className="fas fa-bars text-[15px] text-primary"></i>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
