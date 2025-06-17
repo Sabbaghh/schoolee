@@ -194,7 +194,6 @@ export default function ResultsPage() {
   return (
     <div className="px-5 lg:px-5 xl:px-36 flex flex-col gap-5 mt-32">
       <div className="flex flex-row justify-between">
-        <h1 className="text-2xl">Results for School</h1>
         <div className="text-2xl flex gap-4">
           {inputs.map((input) => (
             <Select

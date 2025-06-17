@@ -2,12 +2,21 @@ import { MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export default function SchoolCard({ data }) {
-  const { is_featured, khda_rating, name, location, curriculum, grades, type } =
-    data;
+  const {
+    is_featured,
+    khda_rating,
+    name,
+    location,
+    curriculum,
+    grades,
+    type,
+    id,
+  } = data;
   return (
-    <div className="relative ">
+    <Link href={`/school/${id}`} className="relative ">
       {is_featured ? (
         <div className="absolute top-[-10] left-6 z-10">
           <Badge className="bg-primary text-white border-none rounded-t-none rounded-md px-4 py-1 font-medium">
@@ -85,6 +94,6 @@ export default function SchoolCard({ data }) {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </Link>
   );
 }

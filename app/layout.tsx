@@ -28,7 +28,7 @@ export default function RootLayout({
         className={`${cairo.variable} font-primary antialiased`}
       >
         <Nav />
-        <SidebarProvider className="flex flex-col">
+        <SidebarProvider defaultOpen={false} className="flex flex-col">
           <SideBar />
           {children}
         </SidebarProvider>

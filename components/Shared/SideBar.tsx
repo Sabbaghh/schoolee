@@ -1,4 +1,6 @@
 'use client';
+
+import { Button } from '@/components/ui/button';
 import {
   School,
   BookOpen,
@@ -12,6 +14,7 @@ import {
   Facebook,
   Instagram,
   X,
+  Menu,
 } from 'lucide-react';
 
 import {
@@ -102,67 +105,75 @@ const Social = [
 function SideBar() {
   const { toggleSidebar } = useSidebar();
   return (
-    <Sidebar side="right" variant="floating" collapsible="icon">
-      <SidebarContent>
-        <SidebarGroup>
-          {/* <SidebarGroupLabel>Quick Naviagtion</SidebarGroupLabel> */}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={toggleSidebar} asChild>
-                  <div>
-                    <div className="bg-secondary/10 rounded-full flex justify-center items-center">
-                      <i className="fas fa-bars text-[15px] text-primary"></i>
+    <>
+      <Button
+        onClick={toggleSidebar}
+        className="absolute bg-transparent top-7 right-10 block md:hidden"
+      >
+        <Menu />
+      </Button>
+      <Sidebar collapsible="icon" side="right" variant="floating">
+        <SidebarContent>
+          <SidebarGroup>
+            {/* <SidebarGroupLabel>Quick Naviagtion</SidebarGroupLabel> */}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={toggleSidebar} asChild>
+                    <div>
+                      <div className="bg-secondary/10 rounded-full flex justify-center items-center">
+                        <i className="fas fa-bars text-[15px] text-primary"></i>
+                      </div>
+                      <span>close</span>
                     </div>
-                    <span>close</span>
-                  </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {Links.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            {Social.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <a href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {Links.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          {Social.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <a href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+            ))}
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+    </>
   );
 }
 

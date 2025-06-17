@@ -9,6 +9,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 
+import { useSidebar } from '@/components/ui/sidebar';
+
 import {
   Select,
   SelectTrigger,
@@ -199,7 +201,7 @@ function Filter() {
     <>
       <div className="flex flex-row py-3 w-full absolute ">
         {/* MobileFilters */}
-        <div className="flex lg:hidden flex-1 ">
+        <div className="flex lg:hidden flex-1 ml-5">
           <Popover>
             <PopoverTrigger>
               <div className="flex flex-row justify-center align-middle ">
