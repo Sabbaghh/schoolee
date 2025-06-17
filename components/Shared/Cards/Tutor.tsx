@@ -6,7 +6,6 @@ export default function Tutor() {
   return (
     <div className="relative ">
       {/* Featured badge positioned at the top of the card */}
-
       <Card className="bg-gray-800 text-white border-none overflow-hidden relative">
         {/* Radial gradient overlay */}
         <div

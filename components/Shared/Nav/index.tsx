@@ -4,8 +4,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
+import api from '@/lib/api';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+
 import {
   Select,
   SelectTrigger,
@@ -19,39 +22,72 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import dummyData from './dummydata.json';
+
+// Define FilterType and InputType interfaces to match your API
+interface InputType {
+  id: string;
+  key: string;
+  name: string;
+  type: 'text' | 'select' | 'range';
+  values?: { min?: string; max?: string; step?: string };
+  options?: { key: string; value: string | { en: string } }[];
+  is_dependant?: boolean;
+  parent_id?: string;
+}
+
+interface FilterType {
+  id: string;
+  type: string;
+  name: string;
+  inputs: InputType[];
+}
 
 function Filter() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // skip initial mount for real-time effect
   const isFirstRun = useRef(true);
 
-  // Determine active tab from URL or default
-  const urlModel = searchParams.get('model_type') || dummyData[0].model_type;
-  const [active, setActive] = useState(urlModel);
+  // State for filters config
+  const [filters, setFilters] = useState<FilterType[] | null>(null);
+
+  // Load filters on mount
+  useEffect(() => {
+    async function loadFilters() {
+      try {
+        const { data } = await api.get<FilterType[]>('/api/v1/filters');
+        setFilters(data);
+      } catch (error) {
+        console.error('Error loading filters:', error);
+        setFilters([]);
+      }
+    }
+    loadFilters();
+  }, []);
+
+  // ==== Note: Do NOT early return here, to keep Hooks order consistent ====
+  // Instead, render a loading state inside your JSX return:
+  // e.g., return filters === null ? <p>Loading filters...</p> : (<div>...your UI...</div>)
+
+  // Initialize active tab: start with URL parameter or empty string
+  const [active, setActive] = useState<string>(searchParams.get('type') || '');
+
+  // After filters load, set default if none provided
+  useEffect(() => {
+    if (filters && filters.length > 0) {
+      setActive((current) => current || filters[0].type);
+    }
+  }, [filters]);
 
   // Build URL-sync or default initial values
   const initialValues = useMemo(() => {
-    const builder = dummyData.find((b) => b.model_type === active)!;
+    const builder = (filters || []).find((f) => f.type === active);
+    if (!builder) return {};
+
     return builder.inputs.reduce((acc, input) => {
       const key = input.key;
       if (input.type === 'range') {
-        const defMin = parseFloat(
-          (input.values &&
-          typeof input.values === 'object' &&
-          'min' in input.values
-            ? input.values.min
-            : '0') ?? '0',
-        );
-        const defMax = parseFloat(
-          (input.values &&
-          typeof input.values === 'object' &&
-          'max' in input.values
-            ? input.values.max
-            : '0') ?? '0',
-        );
+        const defMin = parseFloat(input.values?.min ?? '0');
+        const defMax = parseFloat(input.values?.max ?? '0');
         const qMin = searchParams.get(key + '_min');
         const qMax = searchParams.get(key + '_max');
         acc[key] = {
@@ -59,16 +95,15 @@ function Filter() {
           max: qMax ? parseFloat(qMax) : defMax,
         };
       } else {
-        const q = searchParams.get(key);
-        acc[key] = q ?? '';
+        acc[key] = searchParams.get(key) ?? '';
       }
       return acc;
-    }, {} as Record<string, string | number | Record<string, number>>);
-  }, [active, searchParams]);
+    }, {} as Record<string, string | number | { min?: number; max?: number }>);
+  }, [active, searchParams, filters]);
 
   const [values, setValues] = useState(initialValues);
 
-  // Reset values on tab change or URL change
+  // Reset values when active or initialValues change
   useEffect(() => {
     setValues(initialValues);
   }, [initialValues]);
@@ -81,13 +116,18 @@ function Filter() {
     }
 
     const timeout = setTimeout(() => {
-      const params = new URLSearchParams();
-      params.set('model_type', active);
+      // Start with existing query parameters
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('type', active);
 
-      const builder = dummyData.find((b) => b.model_type === active)!;
-      let shouldNavigate = false; // new flag
+      const builder = filters.find((f) => f.type === active);
+      let shouldNavigate = false;
+      const childrenIds = [];
 
-      builder.inputs.forEach((input) => {
+      builder?.inputs.forEach((input) => {
+        input.children_ids?.forEach((childId) => {
+          childrenIds.push(childId);
+        });
         const key = input.key;
         const val = values[key];
 
@@ -99,51 +139,65 @@ function Filter() {
           if (cur.min != null && cur.min !== defMin) {
             params.set(key + '_min', String(cur.min));
             shouldNavigate = true;
+          } else {
+            params.delete(key + '_min'); // Remove if default
           }
           if (cur.max != null && cur.max !== defMax) {
             params.set(key + '_max', String(cur.max));
             shouldNavigate = true;
+          } else {
+            params.delete(key + '_max'); // Remove if default
           }
         } else if (val && String(val).trim() !== '') {
           params.set(key, String(val));
           shouldNavigate = true;
+        } else {
+          params.delete(key); // Remove if empty
         }
       });
 
-      if (shouldNavigate) {
-        router.push(`/results?${params.toString()}`);
+      if (childrenIds && childrenIds.length) {
+        params.set('fields', childrenIds.join(','));
+      } else {
+        params.delete('fields');
       }
-      // 👆 Only navigate if there's something actually different
+
+      if (shouldNavigate) {
+        router.push(`/s?${params.toString()}`, { scroll: false });
+      }
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [values, active, router]);
+  }, [values, active, router, filters, searchParams]);
 
-  // Handle tab change: switch active, reset values, immediate navigate
+  // Handle tab change
   const handleTabChange = (value: string) => {
     setActive(value);
-    router.push(`/results?model_type=${value}`);
+    router.push(`/s?type=${value}`);
   };
 
-  // Render inputs based on active
-  const inputs = useMemo(() => {
-    return dummyData.find((b) => b.model_type === active)!.inputs;
-  }, [active]);
+  // Prepare inputs
+  const inputs = useMemo(
+    () => (filters || []).find((f) => f.type === active)?.inputs || [],
+    [active, filters],
+  );
   const visibleInputs = inputs.filter(
-    (i) => !i.is_dependant || (i.parent_id && values[i.parent_id] != null),
+    (i) =>
+      !i.is_dependant ||
+      (i.parent_id && (values as unknown)[i.parent_id] != null),
   );
 
   // Input change handler
   const onChange = (
     key: string,
-    value: string | number | Record<string, number>,
+    value: string | number | { min?: number; max?: number },
   ) => {
     setValues((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
     <>
-      <div className="flex flex-row py-3">
+      <div className="flex flex-row py-3 w-full absolute ">
         {/* MobileFilters */}
         <div className="flex lg:hidden flex-1 ">
           <Popover>
@@ -306,21 +360,20 @@ function Filter() {
           </Popover>
         </div>
 
-        <div className="flex-1  justify-center flex">
+        <Link href="/" className="flex-1  justify-center flex">
           <Image alt="logo" src={'/LOGO.png'} width={100} height={100} />
-        </div>
+        </Link>
 
         {/* lg screens */}
-        <div className="hidden lg:block  mx-auto bg-[#0C141A] rounded-b-full flex-3">
+        <div className="hidden lg:block  mx-auto bg-[#0C141A] rounded-xl flex-3 pb-2">
           {/* nav tabs with navigation */}
-
           <Tabs value={active} onValueChange={handleTabChange}>
             <TabsList className="bg-transparent  w-full gap-1">
-              {dummyData.map((b) => (
+              {filters?.map((b) => (
                 <TabsTrigger
                   className={` data-[state=active]:bg-primary/50  data-[state=inactive]:bg-primary  rounded-tl-lg rounded-tr-lg rounded-b-none `}
                   key={b.id}
-                  value={b.model_type}
+                  value={b.type}
                 >
                   {b.name.replace(' Filter', '')}
                 </TabsTrigger>
@@ -337,7 +390,9 @@ function Filter() {
                     <div className="self-center">
                       <div className="self-center mx-2">
                         <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                          <i className="fas fa-school text-[10px] text-primary"></i>
+                          <i
+                            className={`fa ${i.icon} text-[10px] text-primary`}
+                          ></i>
                         </div>
                       </div>
                     </div>
@@ -368,7 +423,7 @@ function Filter() {
                   <>
                     <div className="self-center mx-2">
                       <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                        <i className="fas fa-school text-[10px] text-primary"></i>
+                        <i className={`${i.icon} text-[10px] text-primary`}></i>
                       </div>
                     </div>
                     <Select
@@ -420,7 +475,9 @@ function Filter() {
                         <div className="self-center">
                           <div className="self-center mx-2">
                             <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                              <i className="fas fa-school text-[10px] text-primary"></i>
+                              <i
+                                className={`${i.icon} text-[10px] text-primary`}
+                              ></i>
                             </div>
                           </div>
                         </div>
@@ -498,13 +555,7 @@ function Filter() {
           </div>
         </div>
         <div className="flex-1 flex justify-center">
-          <div className="flex flex-row justify-center align-middle self-center ">
-            {/* <div className="self-center mx-2">
-              <div className="w-8 h-8 bg-secondary/10 rounded-full flex justify-center items-center">
-                <i className="fas fa-bars text-[15px] text-primary"></i>
-              </div>
-            </div> */}
-          </div>
+          <div className="flex flex-row justify-center align-middle self-center "></div>
         </div>
       </div>
     </>

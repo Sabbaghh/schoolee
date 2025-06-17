@@ -1,17 +1,5 @@
 export default [
   {
-    id: 1,
-    featured: true,
-    type: 'Middle School',
-    rating: 'Very good',
-    name: 'Great Minds Early Childhood School',
-    location: 'Umm Suqeim Third – Dubai',
-    curriculum: 'British',
-    grade: 'FS1 - Year 6',
-    price: 46125,
-    image: '/PlaceHolder.png',
-  },
-  {
     id: 2,
     featured: false,
     type: 'Primary School',

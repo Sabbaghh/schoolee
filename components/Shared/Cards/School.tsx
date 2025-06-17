@@ -3,15 +3,18 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-export default function SchoolCard() {
+export default function SchoolCard({ data }) {
+  const { is_featured, khda_rating, name, location, curriculum, grades, type } =
+    data;
   return (
     <div className="relative ">
-      {/* Featured badge positioned at the top of the card */}
-      <div className="absolute top-[-10] left-6 z-10">
-        <Badge className="bg-primary text-white border-none rounded-t-none rounded-md px-4 py-1 font-medium">
-          FEATURED
-        </Badge>
-      </div>
+      {is_featured ? (
+        <div className="absolute top-[-10] left-6 z-10">
+          <Badge className="bg-primary text-white border-none rounded-t-none rounded-md px-4 py-1 font-medium">
+            FEATURED
+          </Badge>
+        </div>
+      ) : null}
 
       <Card className="bg-gray-800 text-white border-none overflow-hidden relative">
         {/* Radial gradient overlay */}
@@ -26,11 +29,9 @@ export default function SchoolCard() {
         <CardContent className="p-4 pt-6 relative z-[1]">
           {/* Header */}
           <div className="flex justify-between mb-4">
+            <span className="text-gray-300 font-light text-sm"></span>
             <span className="text-gray-300 font-light text-sm">
-              Middle School
-            </span>
-            <span className="text-gray-300 font-light text-sm">
-              KHDA : <span className="text-white-400 ">Very good</span>
+              KHDA : <span className="text-white-400 ">{khda_rating}</span>
             </span>
           </div>
 
@@ -49,12 +50,10 @@ export default function SchoolCard() {
 
             {/* School name and location */}
             <div className="flex flex-col justify-center">
-              <h3 className="text-xl font-semibold">
-                Great Minds Early Childhood School
-              </h3>
+              <h3 className="text-xl font-semibold">{name?.en}</h3>
               <div className="flex items-center text-gray-400 text-sm mt-1">
                 <MapPin className="h-4 w-4 mr-1 text-primary" />
-                <span>Umm Suqeim Third - Dubai</span>
+                <span>{location?.name?.en}</span>
               </div>
             </div>
           </div>
@@ -64,17 +63,24 @@ export default function SchoolCard() {
             <div className="space-y-1">
               <div>
                 <span className="text-gray-400">Curriculum: </span>
-                <span className="font-medium">British</span>
+                <span className="font-medium">{curriculum?.name?.en}</span>
               </div>
               <div>
                 <span className="text-gray-400">Grade: </span>
-                <span className="font-medium">FS1 - Year 6</span>
+                <span className="font-medium">
+                  {grades?.[0]?.name || 'N/A'} -{' '}
+                  {grades?.[grades?.length - 1]?.name || 'N/A'}
+                </span>
               </div>
             </div>
 
             <div className="text-right">
               <div className="text-primary text-sm">AED</div>
-              <div className="text-2xl font-bold">46,125</div>
+              <div className="text-2xl font-bold">
+                {Number(grades?.[0].fee.amount) % 1 === 0
+                  ? Number(grades?.[0].fee.amount).toFixed(0)
+                  : Number(grades?.[0].fee.amount).toFixed(2)}
+              </div>
             </div>
           </div>
         </CardContent>

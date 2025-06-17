@@ -29,44 +29,44 @@ import {
 const items = [
   {
     title: 'Schools',
-    url: '/results?model_type=school',
+    url: '/s?type=school',
     icon: School,
   },
   {
     title: 'Academies & Activities',
-    url: '/results?model_type=academy',
+    url: '/s?type=academy',
     icon: BookOpen,
   },
   {
     title: 'Centers',
-    url: '/results?model_type=center',
+    url: '/s?type=center',
     icon: Building2,
   },
   {
     title: 'Coaching & Tutoring',
-    url: '/results?model_type=instructor',
+    url: '/s?type=instructor',
     icon: Package2,
   },
 ];
 const Links = [
   {
     title: 'About us',
-    url: '/results?model_type=school',
+    url: '/s?type=school',
     icon: Info,
   },
   {
     title: 'Blog',
-    url: '/results?model_type=academy',
+    url: '/s?type=academy',
     icon: CalendarMinus2,
   },
   {
     title: `FAQ's`,
-    url: '/results?model_type=center',
+    url: '/s?type=center',
     icon: TableOfContents,
   },
   {
     title: 'Get in touch',
-    url: '/results?model_type=instructor',
+    url: '/s?type=instructor',
     icon: Phone,
   },
 ];
@@ -74,27 +74,27 @@ const Links = [
 const Social = [
   {
     title: 'Linkedin',
-    url: '/results?model_type=school',
+    url: '/s?type=school',
     icon: Linkedin,
   },
   {
     title: 'Facebok',
-    url: '/results?model_type=academy',
+    url: '/s?type=academy',
     icon: Facebook,
   },
   {
     title: `Instagram`,
-    url: '/results?model_type=center',
+    url: '/s?type=center',
     icon: Instagram,
   },
   {
     title: 'X',
-    url: '/results?model_type=instructor',
+    url: '/s?type=instructor',
     icon: X,
   },
   {
     title: 'Mobile',
-    url: '/results?model_type=instructor',
+    url: '/s?type=instructor',
     icon: Phone,
   },
 ];
