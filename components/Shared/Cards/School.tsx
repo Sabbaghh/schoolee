@@ -16,7 +16,7 @@ export default function SchoolCard({ data }) {
     id,
   } = data;
   return (
-    <Link href={`/school/${id}`} className="relative ">
+    <Link href={`/p?s=${type}&id=${id}`} className="relative ">
       {is_featured ? (
         <div className="absolute top-[-10] left-6 z-10">
           <Badge className="bg-primary text-white border-none rounded-t-none rounded-md px-4 py-1 font-medium">
@@ -86,9 +86,9 @@ export default function SchoolCard({ data }) {
             <div className="text-right">
               <div className="text-primary text-sm">AED</div>
               <div className="text-2xl font-bold">
-                {Number(grades?.[0].fee.amount) % 1 === 0
-                  ? Number(grades?.[0].fee.amount).toFixed(0)
-                  : Number(grades?.[0].fee.amount).toFixed(2)}
+                {Number(grades?.[0]?.fee.amount) % 1 === 0
+                  ? Number(grades?.[0]?.fee.amount).toFixed(0)
+                  : Number(grades?.[0]?.fee.amount).toFixed(2)}
               </div>
             </div>
           </div>

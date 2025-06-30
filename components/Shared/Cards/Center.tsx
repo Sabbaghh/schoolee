@@ -8,7 +8,7 @@ export default function SchoolCard({ data }) {
   const { is_featured, name, location, type, id } = data;
 
   return (
-    <Link href={`/school/${id}`} className="relative ">
+    <Link href={`/p?s=${type}&id=${id}`} className="relative ">
       {is_featured ? (
         <div className="absolute top-[-10] left-6 z-10">
           <Badge className="bg-primary text-white border-none rounded-t-none rounded-md px-4 py-1 font-medium">

@@ -8,7 +8,7 @@ export default function Home() {
         <div className="flex-2 flex justify-center items-center ">
           <div className="p-10 md:pl-8 md:pr-48 py-6 ">
             <h1 className="text-4xl lgtext-6xl font-bold">
-              IMPOWER , EDUCATE , CONNECT
+              EMPOWER , EDUCATE , CONNECT
             </h1>
             <p className="text-xl lg:text-2xl mt-4">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do

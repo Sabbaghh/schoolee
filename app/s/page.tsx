@@ -13,16 +13,25 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Button } from '@/components/ui/button';
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Dynamic imports
 const School = dynamic(() => import('./PageType/school'), { suspense: true });
 const Academy = dynamic(() => import('./PageType/academy'), { suspense: true });
 const Center = dynamic(() => import('./PageType/center'), { suspense: true });
@@ -30,43 +39,103 @@ const Instructor = dynamic(() => import('./PageType/instructor'), {
   suspense: true,
 });
 
+// Memoized FilterCombobox Component
+const FilterCombobox = React.memo(
+  function FilterCombobox({ input, value, onChange }) {
+    const [open, setOpen] = React.useState(false);
+
+    const options = input.options.map((opt) => ({
+      value: String(opt.key),
+      label: typeof opt.value === 'string' ? opt.value : opt.value.en,
+    }));
+
+    const selectedOption = options.find((opt) => opt.value === value);
+    const displayLabel = selectedOption
+      ? selectedOption.label
+      : input.placeholder || input.name;
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between text-white border-none"
+          >
+            {displayLabel}
+            <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0 bg-gray-800 text-white shadow-lg">
+          <Command>
+            <CommandInput
+              placeholder={`Search ${input.name}...`}
+              className="text-white"
+            />
+            <CommandList>
+              <CommandEmpty>No options found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={() => {
+                      onChange(input.key, option.value);
+                      setOpen(false);
+                    }}
+                  >
+                    <CheckIcon
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        value === option.value ? 'opacity-100' : 'opacity-0',
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.input === nextProps.input && prevProps.value === nextProps.value
+    );
+  },
+);
+
 export default function ResultsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [data, setData] = useState<unknown[]>([]);
-  const [meta, setMeta] = useState({
-    current_page: 1,
-    last_page: 1,
-    per_page: 9,
-    total: 0,
+  // Combined state to reduce re-renders
+  const [state, setState] = useState({
+    data: [],
+    meta: { current_page: 1, last_page: 1, per_page: 9, total: 0 },
+    inputs: [],
+    loading: true,
   });
-  const [inputs, setInputs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [values, setValues] = useState({});
 
-  // state for each filter key
-  const [values, setValues] = useState<Record<string, string>>({});
-
-  // extract type & page
-  const modelType = searchParams.get('type') || 'school';
-  const currentPage = Number(searchParams.get('page') || '1');
-
-  // seed filter values from URL params whenever inputs or searchParams change
+  // Sync values with inputs and searchParams
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    const v: Record<string, string> = {};
-    inputs.forEach((inp) => {
+    const params = new URLSearchParams(searchParams);
+    const v = {};
+    state.inputs.forEach((inp) => {
       const val = params.get(inp.key);
       if (val) v[inp.key] = val;
     });
     setValues(v);
-  }, [inputs, searchParams.toString()]);
+  }, [state.inputs, searchParams]);
 
-  // onChange: update state + URL (reset page to 1)
-  function onChange(key: string, v: string) {
+  // Handle sub-filter changes
+  function onChange(key, v) {
     setValues((prev) => ({ ...prev, [key]: v }));
-
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams);
     if (v) {
       params.set(key, v);
     } else {
@@ -76,48 +145,56 @@ export default function ResultsPage() {
     router.replace(`/s?${params.toString()}`);
   }
 
-  // build baseParams for pagination links
+  // Build pagination base params
   const baseParams = new URLSearchParams();
   Array.from(searchParams.entries()).forEach(([k, v]) => {
     if (v) baseParams.append(k, v);
   });
   if (!baseParams.has('type')) baseParams.append('type', 'school');
 
-  const pageHref = (page: number) => {
+  const pageHref = (page) => {
     const p = new URLSearchParams(baseParams.toString());
     p.set('page', page.toString());
     return `/s?${p.toString()}`;
   };
 
-  // fetch data + inputs when params change
+  // Fetch data when searchParams change
   useEffect(() => {
     async function fetchData() {
-      setLoading(true);
+      setState((prev) => ({ ...prev, loading: true }));
       try {
         const url = `${
           process.env.NEXT_PUBLIC_BASE_URI
-        }/api/v1/search?${baseParams.toString()}`;
+        }/api/v1/search?${searchParams.toString()}`;
         const res = await axios.get(url);
         const r = res.data.results;
-        setData(r.data);
-        setMeta({
-          current_page: r.current_page,
-          last_page: r.last_page,
-          per_page: r.per_page,
-          total: r.total,
+        setState({
+          data: r.data,
+          meta: {
+            current_page: r.current_page,
+            last_page: r.last_page,
+            per_page: r.per_page,
+            total: r.total,
+          },
+          inputs: res.data.inputs || [],
+          loading: false,
         });
-        setInputs(res.data.inputs || []);
       } catch (err) {
         console.error(err);
-        setData([]);
-        setMeta({ current_page: 1, last_page: 1, per_page: 9, total: 0 });
-        setInputs([]);
-      } finally {
-        setLoading(false);
+        setState({
+          data: [],
+          meta: { current_page: 1, last_page: 1, per_page: 9, total: 0 },
+          inputs: [],
+          loading: false,
+        });
       }
     }
     fetchData();
-  }, [searchParams.toString()]);
+  }, [searchParams]);
+
+  const { data, meta, inputs, loading } = state;
+  const modelType = searchParams.get('type') || 'school';
+  const currentPage = Number(searchParams.get('page') || '1');
 
   const renderComponent = () => {
     switch (modelType) {
@@ -136,24 +213,19 @@ export default function ResultsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 px-5 lg:px-5 xl:px-36  mt-32">
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 px-5 lg:px-5 xl:px-36 mt-32">
         {Array.from({ length: 9 }).map((_, idx) => (
           <div
             key={idx}
             className="relative border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden p-2"
           >
             <div className="bg-gray-800 rounded-md overflow-hidden relative">
-              {/* Radial overlay (static) */}
               <div className="absolute inset-0 bg-gray-700 mix-blend-overlay pointer-events-none" />
-
               <div className="p-4 pt-6 relative z-10 space-y-4">
-                {/* Header line placeholders */}
                 <div className="flex justify-between">
                   <Skeleton className="h-4 w-24 bg-gray-100/80 dark:bg-gray-700/60" />
                   <Skeleton className="h-4 w-28 bg-gray-100/80 dark:bg-gray-700/60" />
                 </div>
-
-                {/* Logo + title */}
                 <div className="flex gap-4">
                   <Skeleton className="h-14 w-14 rounded-full bg-gray-100/80 dark:bg-gray-700/60" />
                   <div className="flex-1 space-y-2">
@@ -161,8 +233,6 @@ export default function ResultsPage() {
                     <Skeleton className="h-4 w-1/2 bg-gray-100/80 dark:bg-gray-700/60" />
                   </div>
                 </div>
-
-                {/* Footer info */}
                 <div className="flex justify-between items-center">
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-32 bg-gray-100/80 dark:bg-gray-700/60" />
@@ -184,7 +254,6 @@ export default function ResultsPage() {
   const { current_page, last_page } = meta;
   const totalPages = last_page;
 
-  // pagination range (5 pages)
   const maxToShow = 5;
   let start = Math.max(1, currentPage - Math.floor(maxToShow / 2));
   let end = Math.min(totalPages, start + maxToShow - 1);
@@ -196,35 +265,12 @@ export default function ResultsPage() {
       <div className="flex flex-row justify-between">
         <div className="text-2xl flex gap-4">
           {inputs.map((input) => (
-            <Select
+            <FilterCombobox
               key={input.id}
+              input={input}
               value={values[input.key] || ''}
-              onValueChange={(v) => onChange(input.key, v)}
-            >
-              <SelectTrigger
-                className="border-none w-full text-white"
-                id={input.key}
-              >
-                <SelectValue placeholder={input.placeholder || input.name} />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 text-white shadow-lg">
-                {input.options.length > 0 ? (
-                  input.options.map((opt) => (
-                    <SelectItem
-                      key={opt.key}
-                      value={String(opt.key)}
-                      className="text-white hover:bg-white/10 data-[state=checked]:bg-white/20"
-                    >
-                      {typeof opt.value === 'string' ? opt.value : opt.value.en}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="p-2 text-sm text-white/60">
-                    No options available
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
+              onChange={onChange}
+            />
           ))}
         </div>
       </div>
@@ -292,8 +338,6 @@ export default function ResultsPage() {
     </div>
   );
 }
-
-// Individual loading placeholders
 
 function SchoolLoading() {
   return (
