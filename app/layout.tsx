@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import SideBar from '@/components/Shared/SideBar';
 
+// import { LocationModal } from '@/components/Shared/CountryDialog';
+
 import { Cairo } from 'next/font/google';
 
 import Nav from '@/components/Shared/Nav';
@@ -30,6 +32,7 @@ export default function RootLayout({
         <Nav />
         <SidebarProvider defaultOpen={false} className="flex flex-col">
           <SideBar />
+          {/* <LocationModal /> */}
           {children}
         </SidebarProvider>
       </body>

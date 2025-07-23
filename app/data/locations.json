@@ -1,0 +1,17 @@
+[
+  {
+    "country": "United States",
+    "code": "us",
+    "cities": ["New York", "Los Angeles", "Chicago", "Houston", "Miami"]
+  },
+  {
+    "country": "United Kingdom",
+    "code": "uk",
+    "cities": ["London", "Manchester", "Birmingham", "Glasgow", "Edinburgh"]
+  },
+  {
+    "country": "Canada",
+    "code": "ca",
+    "cities": ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa"]
+  }
+]
