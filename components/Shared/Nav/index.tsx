@@ -137,6 +137,7 @@ const Filter = React.memo(function Filter() {
   useEffect(() => {
     async function loadFilters() {
       try {
+        console.log('Loading filters...', process.env.NEXT_PUBLIC_BASE_URI);
         const { data } = await api.get<FilterType[]>('/api/v1/filters');
         setFilters(data);
       } catch (error) {
