@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import SideBar from '@/components/Shared/SideBar';
+import { Suspense } from 'react';
 
 // import { LocationModal } from '@/components/Shared/CountryDialog';
 
@@ -29,12 +30,14 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${cairo.variable} font-primary antialiased`}
       >
-        <Nav />
-        <SidebarProvider defaultOpen={false} className="flex flex-col">
-          <SideBar />
-          {/* <LocationModal /> */}
-          {children}
-        </SidebarProvider>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Nav />
+          <SidebarProvider defaultOpen={false} className="flex flex-col">
+            <SideBar />
+            {/* <LocationModal /> */}
+            {children}
+          </SidebarProvider>
+        </Suspense>
       </body>
     </html>
   );
