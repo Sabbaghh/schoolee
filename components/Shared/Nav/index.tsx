@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/command';
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import LangaugeSelector from '@/components/Shared/Langauge-Selector';
 
 // Define FilterType and InputType interfaces
 interface InputType {
@@ -131,7 +132,12 @@ const Filter = React.memo(function Filter() {
   const isFirstRun = useRef(true);
 
   // State for filters config
+  // State for filters config
   const [filters, setFilters] = useState<FilterType[] | null>(null);
+  const [active, setActive] = useState<string>(searchParams.get('type') || '');
+  const [values, setValues] = useState<
+    Record<string, string | number | { min?: number; max?: number }>
+  >({});
 
   // Load filters on mount
   useEffect(() => {
@@ -147,9 +153,6 @@ const Filter = React.memo(function Filter() {
     }
     loadFilters();
   }, []);
-
-  // Initialize active tab
-  const [active, setActive] = useState<string>(searchParams.get('type') || '');
 
   // Set default active tab after filters load
   useEffect(() => {
@@ -182,13 +185,10 @@ const Filter = React.memo(function Filter() {
     }, {} as Record<string, string | number | { min?: number; max?: number }>);
   }, [active, filters, searchParams]);
 
-  const [values, setValues] = useState(initialValues);
-
   // Reset values when initialValues change
   useEffect(() => {
     setValues(initialValues);
   }, [initialValues]);
-
   // Real-time navigation effect with debounce
   useEffect(() => {
     if (isFirstRun.current) {
@@ -202,7 +202,7 @@ const Filter = React.memo(function Filter() {
 
       const builder = filters?.find((f) => f.type === active);
       let shouldNavigate = false;
-      const childrenIds = [];
+      const childrenIds: string[] = [];
       const dependentKeys = new Set<string>();
 
       // Collect all dependent input keys
@@ -225,14 +225,14 @@ const Filter = React.memo(function Filter() {
         if (input.children_ids?.length) {
           const paramValue =
             input.type === 'range'
-              ? `${values[key]?.min}_${values[key]?.max}`
+              ? `${values[key]?.min ?? ''}_${values[key]?.max ?? ''}`
               : String(val);
           const searchParamValue =
             input.type === 'range'
-              ? `${searchParams.get(key + '_min')}_${searchParams.get(
-                  key + '_max',
-                )}`
-              : searchParams.get(key);
+              ? `${searchParams.get(key + '_min') ?? ''}_${
+                  searchParams.get(key + '_max') ?? ''
+                }`
+              : searchParams.get(key) ?? '';
           if (paramValue !== searchParamValue) {
             changedParents.add(key);
           }
@@ -242,15 +242,15 @@ const Filter = React.memo(function Filter() {
         if (input.type === 'range') {
           const defMin = parseFloat(input.values?.min ?? '0');
           const defMax = parseFloat(input.values?.max ?? '0');
-          const cur = val as { min?: number; max?: number };
+          const cur = val as { min?: number; max?: number } | undefined;
 
-          if (cur.min != null && cur.min !== defMin) {
+          if (cur?.min != null && cur.min !== defMin) {
             params.set(key + '_min', String(cur.min));
             shouldNavigate = true;
           } else {
             params.delete(key + '_min');
           }
-          if (cur.max != null && cur.max !== defMax) {
+          if (cur?.max != null && cur.max !== defMax) {
             params.set(key + '_max', String(cur.max));
             shouldNavigate = true;
           } else {
@@ -282,18 +282,23 @@ const Filter = React.memo(function Filter() {
         params.delete('fields');
       }
 
-      if (shouldNavigate) {
-        router.push(`/s?${params.toString()}`, { scroll: false });
+      // Only navigate if parameters have changed
+      const currentUrl = `/s?${params.toString()}`;
+      if (
+        shouldNavigate &&
+        window.location.pathname + window.location.search !== currentUrl
+      ) {
+        router.push(currentUrl, { scroll: false });
       }
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [values, active, router, filters, searchParams]);
+  }, [values, active, filters, searchParams, router]);
 
   // Handle tab change
   const handleTabChange = (value: string) => {
     setActive(value);
-    router.push(`/s?type=${value}`);
+    router.push(`/s?type=${value}`, { scroll: false });
   };
 
   // Prepare inputs
@@ -637,7 +642,9 @@ const Filter = React.memo(function Filter() {
           </div>
         </div>
         <div className="flex-1 flex justify-center">
-          <div className="flex flex-row justify-center align-middle self-center"></div>
+          <div className="flex flex-row justify-center align-middle self-center  ">
+            <LangaugeSelector />
+          </div>
         </div>
       </div>
     </>

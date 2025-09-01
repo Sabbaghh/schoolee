@@ -162,12 +162,18 @@ export default function ResultsPage() {
   useEffect(() => {
     async function fetchData() {
       setState((prev) => ({ ...prev, loading: true }));
+      const modelType = searchParams.get('type') || 'school';
+      const params = new URLSearchParams(searchParams);
+      params.delete('type');
+
+      const country = 'AE';
+      const url = `${
+        process.env.NEXT_PUBLIC_BASE_URI
+      }/api/v1/search/${modelType}/${country}?${params.toString()}`;
       try {
-        const url = `${
-          process.env.NEXT_PUBLIC_BASE_URI
-        }/api/v1/search?${searchParams.toString()}`;
         const res = await axios.get(url);
         const r = res.data.results;
+
         setState({
           data: r.data,
           meta: {

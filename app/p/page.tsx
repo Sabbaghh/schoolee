@@ -38,7 +38,7 @@ function Page() {
           `${process.env.NEXT_PUBLIC_BASE_URI}/api/v1/entity/${type}/${id}`,
         );
         setData(res.data);
-        console.log(res.data);
+        // console.log(res.data);
       } catch (err: any) {
         setError(err.message || 'Error fetching data');
       }

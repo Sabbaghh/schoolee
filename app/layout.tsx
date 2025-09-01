@@ -34,7 +34,6 @@ export default function RootLayout({
           <Nav />
           <SidebarProvider defaultOpen={false} className="flex flex-col">
             <SideBar />
-            {/* <LocationModal /> */}
             {children}
           </SidebarProvider>
         </Suspense>
