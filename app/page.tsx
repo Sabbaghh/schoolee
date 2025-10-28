@@ -35,7 +35,7 @@ export default function Home() {
         <div className="flex-3 flex">
           {/* tap */}
           <Link
-            href="/s?type=school"
+            href="/s?t=school"
             className="relative flex-1 bg-[url('/images/tap1.png')] bg-cover bg-center flex justify-center items-center md:rounded-tr-2xl"
           >
             <div className="absolute inset-0 bg-primary opacity-50 z-0 md:rounded-tr-2xl"></div>
@@ -44,7 +44,7 @@ export default function Home() {
             </div>
           </Link>
           <Link
-            href="s?type=academy"
+            href="s?t=academy"
             className="relative flex-1 bg-[url('/images/tap2.png')] bg-cover bg-center flex justify-center items-center md:rounded-t-2xl"
           >
             <div className="absolute inset-0 bg-primary opacity-50 z-0 md:rounded-t-2xl"></div>
@@ -53,7 +53,7 @@ export default function Home() {
             </div>
           </Link>
           <Link
-            href="/s?type=center"
+            href="/s?t=center"
             className="relative flex-1 bg-[url('/images/tap1.png')] bg-cover bg-center flex justify-center items-center md:rounded-t-2xl"
           >
             <div className="absolute inset-0 bg-primary opacity-50 z-0 md:rounded-t-2xl"></div>
@@ -62,7 +62,7 @@ export default function Home() {
             </div>
           </Link>
           <Link
-            href="/s?type=instructor"
+            href="/s?t=instructor"
             className="relative flex-1 bg-[url('/images/tap2.png')] bg-cover bg-center flex justify-center items-center md:rounded-t-2xl"
           >
             <div className="absolute inset-0 bg-primary opacity-50 z-0 md:rounded-t-2xl"></div>

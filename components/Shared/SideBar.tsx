@@ -33,44 +33,44 @@ import {
 const items = [
   {
     title: 'Schools',
-    url: '/s?type=school',
+    url: '/s?t=school',
     icon: School,
   },
   {
     title: 'Academies & Activities',
-    url: '/s?type=academy',
+    url: '/s?t=academy',
     icon: BookOpen,
   },
   {
     title: 'Centers',
-    url: '/s?type=center',
+    url: '/s?t=center',
     icon: Building2,
   },
   {
     title: 'Coaching & Tutoring',
-    url: '/s?type=instructor',
+    url: '/s?t=instructor',
     icon: Package2,
   },
 ];
 const Links = [
   {
     title: 'About us',
-    url: '/s?type=school',
+    url: '/s?t=school',
     icon: Info,
   },
   {
     title: 'Blog',
-    url: '/s?type=academy',
+    url: '/s?t=academy',
     icon: CalendarMinus2,
   },
   {
     title: `FAQ's`,
-    url: '/s?type=center',
+    url: '/s?t=center',
     icon: TableOfContents,
   },
   {
     title: 'Get in touch',
-    url: '/s?type=instructor',
+    url: '/s?t=instructor',
     icon: Phone,
   },
 ];
@@ -78,30 +78,32 @@ const Links = [
 const Social = [
   {
     title: 'Linkedin',
-    url: '/s?type=school',
+    url: '/s?t=school',
     icon: Linkedin,
   },
   {
     title: 'Facebok',
-    url: '/s?type=academy',
+    url: '/s?t=academy',
     icon: Facebook,
   },
   {
     title: `Instagram`,
-    url: '/s?type=center',
+    url: '/s?t=center',
     icon: Instagram,
   },
   {
     title: 'X',
-    url: '/s?type=instructor',
+    url: '/s?t=instructor',
     icon: X,
   },
   {
     title: 'Mobile',
-    url: '/s?type=instructor',
+    url: '/s?t=instructor',
     icon: Phone,
   },
 ];
+
+import LangaugeSelector from '@/components/Shared/Langauge-Selector';
 
 function SideBar() {
   const { toggleSidebar } = useSidebar();
@@ -129,6 +131,7 @@ function SideBar() {
                     </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
                 {items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
@@ -161,6 +164,9 @@ function SideBar() {
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
+            {/* <SidebarMenuItem>
+              <LangaugeSelector />
+            </SidebarMenuItem> */}
             {Social.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>

@@ -32,7 +32,7 @@ interface InputType {
   id: string;
   key: string;
   name: string;
-  type: 'text' | 'select' | 'range';
+  type: 'text' | 'select' | 'range' | 'combobox';
   values?: { min?: string; max?: string; step?: string };
   options?: { key: string; value: string | { en: string } }[];
   is_dependant?: boolean;
@@ -81,7 +81,12 @@ const FilterCombobox = React.memo(
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0 bg-gray-800 text-white shadow-lg">
-          <Command>
+          <Command
+            filter={(val, search) => {
+              if (val.toLowerCase().includes(search.toLowerCase())) return 1;
+              return 0;
+            }}
+          >
             <CommandInput
               placeholder={`Search ${input.name}...`}
               className="text-white"
@@ -96,16 +101,118 @@ const FilterCombobox = React.memo(
                 {options.map((option) => (
                   <CommandItem
                     key={option.value}
-                    value={option.value}
-                    onSelect={() => {
-                      onChange(input.key, option.value);
-                      setOpen(false);
+                    value={option.label}
+                    onSelect={(currentValue) => {
+                      const selected = options.find(
+                        (opt) =>
+                          opt.label.toLowerCase() ===
+                          currentValue.toLowerCase(),
+                      );
+                      if (selected) {
+                        onChange(input.key, selected.value);
+                        setOpen(false);
+                      }
                     }}
                   >
                     <CheckIcon
                       className={cn(
                         'mr-2 h-4 w-4',
                         value === option.value ? 'opacity-100' : 'opacity-0',
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.input === nextProps.input && prevProps.value === nextProps.value
+    );
+  },
+);
+
+// Memoized MultiSelectCombobox Component
+const MultiSelectCombobox = React.memo(
+  function MultiSelectCombobox({ input, value, onChange }) {
+    const [open, setOpen] = React.useState(false);
+
+    const options =
+      input.options?.map((opt) => ({
+        value: String(opt.key),
+        label: typeof opt.value === 'string' ? opt.value : opt.value.en,
+      })) || [];
+
+    const selected = value ? value.split(',').filter(Boolean) : [];
+
+    // const handleUnselect = (val: string) => {
+    //   const newSelected = selected.filter((s) => s !== val);
+    //   onChange(input.key, newSelected.join(','));
+    // };
+
+    const handleSelect = (currentValue: string) => {
+      const selectedOpt = options.find(
+        (opt) => opt.label.toLowerCase() === currentValue.toLowerCase(),
+      );
+      if (selectedOpt) {
+        const val = selectedOpt.value;
+        const newSelected = selected.includes(val)
+          ? selected.filter((s) => s !== val)
+          : [...selected, val];
+        onChange(input.key, newSelected.join(','));
+      }
+    };
+
+    const displayLabel =
+      selected.length > 0 ? `${input.name} (${selected.length})` : input.name;
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="justify-between text-white border-none bg-transparent"
+          >
+            {displayLabel}
+            <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0 bg-gray-800 text-white shadow-lg">
+          <Command
+            filter={(val, search) => {
+              if (val.toLowerCase().includes(search.toLowerCase())) return 1;
+              return 0;
+            }}
+          >
+            <CommandInput
+              placeholder={`Search ${input.name}...`}
+              className="text-white"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setOpen(false);
+              }}
+            />
+            <CommandList>
+              <CommandEmpty>No options found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.label}
+                    onSelect={handleSelect}
+                  >
+                    <CheckIcon
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        selected.includes(option.value)
+                          ? 'opacity-100'
+                          : 'opacity-0',
                       )}
                     />
                     {option.label}
@@ -143,7 +250,6 @@ const Filter = React.memo(function Filter() {
   useEffect(() => {
     async function loadFilters() {
       try {
-        console.log('Loading filters...', process.env.NEXT_PUBLIC_BASE_URI);
         const { data } = await api.get<FilterType[]>('/api/v1/filters');
         setFilters(data);
       } catch (error) {
@@ -284,6 +390,7 @@ const Filter = React.memo(function Filter() {
 
       // Only navigate if parameters have changed
       const currentUrl = `/s?${params.toString()}`;
+
       if (
         shouldNavigate &&
         window.location.pathname + window.location.search !== currentUrl
@@ -298,7 +405,7 @@ const Filter = React.memo(function Filter() {
   // Handle tab change
   const handleTabChange = (value: string) => {
     setActive(value);
-    router.push(`/s?type=${value}`, { scroll: false });
+    router.push(`/s?t=${value}`, { scroll: false });
   };
 
   // Prepare inputs
@@ -307,8 +414,7 @@ const Filter = React.memo(function Filter() {
     [active, filters],
   );
   const visibleInputs = inputs.filter(
-    (i) =>
-      !i.is_dependant || (i.parent_id && (values as any)[i.parent_id] != null),
+    (i) => !i.is_dependant || (i.parent_id && values[i.parent_id] != null),
   );
 
   // Input change handler
@@ -341,9 +447,11 @@ const Filter = React.memo(function Filter() {
                   <div className="w-full flex" key={i.id}>
                     {i.type === 'text' && (
                       <>
-                        <div className="self-center mx-2">
-                          <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                            <i className="fas fa-school text-[10px] text-primary"></i>
+                        <div className="self-center">
+                          <div className="self-center mx-2">
+                            <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
+                              <div className="w-1/2 h-1/2 bg-primary rounded-full" />
+                            </div>
                           </div>
                         </div>
                         <Input
@@ -360,12 +468,29 @@ const Filter = React.memo(function Filter() {
 
                     {i.type === 'select' && (
                       <>
-                        <div className="self-center mx-2">
-                          <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                            <i className="fas fa-school text-[10px] text-primary"></i>
+                        <div className="self-center">
+                          <div className="self-center mx-2">
+                            <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
+                              <div className="w-1/2 h-1/2 bg-primary rounded-full" />
+                            </div>
                           </div>
                         </div>
                         <FilterCombobox
+                          input={i}
+                          value={values[i.key] as string | undefined}
+                          onChange={onChange}
+                        />
+                      </>
+                    )}
+
+                    {i.type === 'combobox' && (
+                      <>
+                        <div className="self-center mx-2">
+                          <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
+                            <i className="fas fa-filter text-[10px] text-primary"></i>
+                          </div>
+                        </div>
+                        <MultiSelectCombobox
                           input={i}
                           value={values[i.key] as string | undefined}
                           onChange={onChange}
@@ -398,7 +523,7 @@ const Filter = React.memo(function Filter() {
                             <div className="self-center">
                               <div className="self-center mx-2">
                                 <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                                  <i className="fas fa-school text-[10px] text-primary"></i>
+                                  <i className="fas fa-filter text-[10px] text-primary"></i>
                                 </div>
                               </div>
                             </div>
@@ -495,9 +620,7 @@ const Filter = React.memo(function Filter() {
                     <div className="self-center">
                       <div className="self-center mx-2">
                         <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                          <i
-                            className={`fa ${i.icon} text-[10px] text-primary`}
-                          ></i>
+                          <div className="w-1/2 h-1/2 bg-primary rounded-full" />
                         </div>
                       </div>
                     </div>
@@ -526,12 +649,32 @@ const Filter = React.memo(function Filter() {
 
                 {i.type === 'select' && (
                   <>
-                    <div className="self-center mx-2">
-                      <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                        <i className={`${i.icon} text-[10px] text-primary`}></i>
+                    <div className="self-center">
+                      <div className="self-center mx-2">
+                        <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
+                          <div className="w-1/2 h-1/2 bg-primary rounded-full" />
+                        </div>
                       </div>
                     </div>
                     <FilterCombobox
+                      input={i}
+                      value={values[i.key] as string | undefined}
+                      onChange={onChange}
+                    />
+                    <div className="bg-primary h-0.5 w-1/4 my-auto rounded-full"></div>
+                  </>
+                )}
+
+                {i.type === 'combobox' && (
+                  <>
+                    <div className="self-center">
+                      <div className="self-center mx-2">
+                        <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
+                          <div className="w-1/2 h-1/2 bg-primary rounded-full" />
+                        </div>
+                      </div>
+                    </div>
+                    <MultiSelectCombobox
                       input={i}
                       value={values[i.key] as string | undefined}
                       onChange={onChange}
@@ -565,9 +708,7 @@ const Filter = React.memo(function Filter() {
                         <div className="self-center">
                           <div className="self-center mx-2">
                             <div className="w-6 h-6 bg-secondary/10 rounded-full flex justify-center items-center">
-                              <i
-                                className={`${i.icon} text-[10px] text-primary`}
-                              ></i>
+                              <div className="w-1/2 h-1/2 bg-primary rounded-full" />
                             </div>
                           </div>
                         </div>
@@ -642,7 +783,7 @@ const Filter = React.memo(function Filter() {
           </div>
         </div>
         <div className="flex-1 flex justify-center">
-          <div className="flex flex-row justify-center align-middle self-center  ">
+          <div className="sm:flex flex-row justify-center align-middle self-center mr-12">
             <LangaugeSelector />
           </div>
         </div>

@@ -25,8 +25,8 @@ export default function Component() {
   const [selectedCountry, setSelectedCountry] = useState('');
 
   const countries = [
-    { value: 'ksa', label: 'KSA', flag: '🇸🇦' },
-    { value: 'uae', label: 'United Arab Emirates', flag: '🇦🇪' },
+    { value: 'SA', label: 'KSA', flag: '🇸🇦' },
+    { value: 'AE', label: 'United Arab Emirates', flag: '🇦🇪' },
   ];
 
   useEffect(() => {
@@ -35,6 +35,8 @@ export default function Component() {
       if (storedCountry && countries.some((c) => c.value === storedCountry)) {
         setCurrentCountry(storedCountry);
         setSelectedCountry(storedCountry);
+      } else {
+        setOpen(true);
       }
     }
   }, []);
@@ -47,23 +49,32 @@ export default function Component() {
     if (selectedCountry) {
       localStorage.setItem('country', selectedCountry);
       setCurrentCountry(selectedCountry);
-      console.log('Selected country:', selectedCountry);
-      // Here you would typically update your app's settings based on country
+      // Reload the page to ensure API requests use the new country
+      window.location.reload();
       setOpen(false);
     }
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen && !currentCountry) {
+      setSelectedCountry('AE');
+      setCurrentCountry('AE');
+      localStorage.setItem('country', 'AE');
+      window.location.reload();
+    }
+    setOpen(newOpen);
   };
 
   const selectedCountryObj = countries.find((c) => c.value === currentCountry);
 
   return (
-    // <div className="flex min-h-screen items-center justify-center bg-gray-50">
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2 bg-transparent">
+        <Button variant="outline" className="bg-transparent">
           {selectedCountryObj ? (
             <>
               <span>{selectedCountryObj.flag}</span>
-              {selectedCountryObj.label}
+              {/* <div className="hidden sm:block">{selectedCountryObj.label}</div> */}
             </>
           ) : (
             <>
@@ -120,6 +131,5 @@ export default function Component() {
         </div>
       </DialogContent>
     </Dialog>
-    // </div>
   );
 }
