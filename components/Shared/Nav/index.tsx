@@ -241,7 +241,7 @@ const Filter = React.memo(function Filter() {
   // State for filters config
   // State for filters config
   const [filters, setFilters] = useState<FilterType[] | null>(null);
-  const [active, setActive] = useState<string>(searchParams.get('type') || '');
+  const [active, setActive] = useState<string>(searchParams.get('t') || '');
   const [values, setValues] = useState<
     Record<string, string | number | { min?: number; max?: number }>
   >({});
