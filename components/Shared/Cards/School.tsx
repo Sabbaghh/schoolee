@@ -36,13 +36,13 @@ export default function SchoolCard({ data }: SchoolCardProps) {
 
   return (
     <Link href={`/p?s=${type}&id=${slug}`} className="relative block group">
-      {is_featured && (
+      {is_featured ? (
         <div className="absolute top-[-10px] left-4 z-10">
           <Badge className="bg-primary text-white border-none rounded-md px-3 py-1 font-medium text-xs tracking-wide shadow-sm">
             FEATURED
           </Badge>
         </div>
-      )}
+      ) : null}
 
       <Card className="bg-gray-900 text-white border-none relative min-h-56 overflow-hidden transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:bg-gray-850">
         {/* Radial gradient overlay */}

@@ -267,7 +267,7 @@ function Page() {
         <div className="flex flex-col lg:flex-row gap-5 mt-5 h-[50vh]">
           <div className="flex-[3] relative rounded-lg overflow-hidden shadow-lg">
             <Image
-              src={mainImage}
+              src={'/images/1.jpg'}
               alt={`${data.name.en} Main Image`}
               fill
               quality={100}
@@ -280,7 +280,7 @@ function Page() {
                 <PopoverTrigger asChild>
                   <div className="flex-1 bg-black relative rounded-sm overflow-hidden cursor-pointer shadow-md">
                     <Image
-                      src={imgSrc}
+                      src={`/images/${i + 1}.jpg`}
                       alt={`${data.name.en} Thumbnail ${i + 1}`}
                       fill
                       quality={100}
@@ -290,7 +290,7 @@ function Page() {
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-transparent border-none">
                   <Image
-                    src={imgSrc}
+                    src={`/images/${i + 1}.jpg`}
                     alt={`${data.name.en} Enlarged ${i + 1}`}
                     width={600}
                     height={400}
